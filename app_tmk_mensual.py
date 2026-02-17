@@ -23,7 +23,7 @@ if "usuario" not in st.session_state:
     st.session_state.rol = None
 
 if st.session_state.usuario is None:
-    st.title("🔐 Acceso sistema TMK - SER Comunicaciones")
+    st.title("🔐 Acceso sistema TMK - Ser Comunicaciones")
 
     usuario = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")
