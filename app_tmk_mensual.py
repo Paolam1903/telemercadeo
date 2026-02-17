@@ -126,12 +126,9 @@ if st.session_state.rol == "director":
         archivo_base = "presupuesto_TMK.xlsx"
         archivo_hist = "historico_cambios_TMK.xlsx"
 
-        # Cargar base completa
         df_base = pd.read_excel(archivo_base, sheet_name="Datos")
 
-        # Actualizar solo los registros filtrados
         for index, row in df_editado.iterrows():
-
             condicion = (
                 (df_base["Año"] == row["Año"]) &
                 (df_base["Mes"] == row["Mes"]) &
@@ -141,10 +138,8 @@ if st.session_state.rol == "director":
 
             df_base.loc[condicion, "Pago cumplimiento"] = row["Pago cumplimiento"]
 
-        # Guardar archivo base actualizado
         df_base.to_excel(archivo_base, sheet_name="Datos", index=False)
 
-        # Guardar histórico
         df_hist = df_editado.copy()
         df_hist["Usuario cambio"] = st.session_state.usuario
         df_hist["Fecha cambio"] = datetime.now()
@@ -159,6 +154,11 @@ if st.session_state.rol == "director":
 
         st.success("Cambios guardados y actualizados correctamente")
 
+else:
+    # Usuario administrativo: solo visualiza
+    df_editado = df_filtrado.copy()
+    st.info("Modo administrativo: solo visualización")
+    st.dataframe(df_editado, use_container_width=True)
 # -------------------------
 # DESCARGAR HISTÓRICO
 # -------------------------
