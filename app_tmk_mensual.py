@@ -54,12 +54,42 @@ if st.sidebar.button("Cerrar sesión"):
 # -------------------------
 # CARGAR DATOS
 # -------------------------
-df = pd.read_excel("presupuesto_TMK.xlsx", sheet_name="Datos")
+archivo_base = "presupuesto_TMK.xlsx"
+archivo_hist = "historico_cambios_TMK.xlsx"
+
+# Cargar archivo base
+df = pd.read_excel(archivo_base, sheet_name="Datos")
+
+# Limpiar nombres de columnas primero
 df.columns = df.columns.str.strip()
 
 # Si no existe la columna Pago cumplimiento la creamos
 if "Pago cumplimiento" not in df.columns:
     df["Pago cumplimiento"] = "0%"
+
+# Si existe histórico, aplicar últimos cambios
+if os.path.exists(archivo_hist):
+    hist = pd.read_excel(archivo_hist)
+    hist.columns = hist.columns.str.strip()
+
+    if not hist.empty:
+        # Tomar el último cambio por registro
+        hist_ordenado = hist.sort_values("Fecha cambio")
+        ultimos = hist_ordenado.drop_duplicates(
+            subset=["Año", "Mes", "Nombre", "Concepto"],
+            keep="last"
+        )
+
+        for _, row in ultimos.iterrows():
+            condicion = (
+                (df["Año"] == row["Año"]) &
+                (df["Mes"] == row["Mes"]) &
+                (df["Nombre"] == row["Nombre"]) &
+                (df["Concepto"] == row["Concepto"])
+            )
+            df.loc[condicion, "Pago cumplimiento"] = row["Pago cumplimiento"]
+
+
 
 # -------------------------
 # FILTROS EN SIDEBAR
