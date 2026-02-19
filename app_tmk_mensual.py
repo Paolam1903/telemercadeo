@@ -121,7 +121,7 @@ st.title(f"📊 Presupuesto TMK - {mes} {año}")
 # -------------------------
 def calcular_cumplimiento(row):
     if row["Concepto"] in ["Pyme Móvil - salarial", "CLOUND - salarial"]:
-        return "Sin meta"
+        return "0%"
     elif row["Meta"] == 0:
         return "0%"
     else:
