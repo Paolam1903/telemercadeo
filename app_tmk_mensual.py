@@ -179,14 +179,14 @@ if st.session_state.rol == "director":
     # =========================
     st.markdown("### 📊 Vista cumplimiento")
 
-
     st.dataframe(
         df_editado.style
         .format({
             "Meta": "{:,.0f}",
             "Ejecutado": "{:,.1f}",
+            "% Cumplimiento": "{:.1f}%"
         })
-        .applymap(
+        .map(
             color_cumplimiento,
             subset=["% Cumplimiento"]
         ),
