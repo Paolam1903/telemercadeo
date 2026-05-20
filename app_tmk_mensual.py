@@ -254,13 +254,12 @@ else:
             "Meta": "{:,.0f}",
             "Ejecutado": "{:,.1f}",
         })
-        .applymap(
+        .map(
             color_cumplimiento,
             subset=["% Cumplimiento"]
         ),
         use_container_width=True
     )
-
 
 # -------------------------
 # DESCARGAR HISTÓRICO
