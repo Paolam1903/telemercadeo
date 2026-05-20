@@ -120,13 +120,12 @@ st.title(f"📊 Presupuesto TMK - {mes} {año}")
 # CÁLCULO CUMPLIMIENTO
 # -------------------------
 def calcular_cumplimiento(row):
-    if row["Concepto"] in ["Pyme Móvil - salarial", "CLOUND - salarial"]:
-        return "0%"
-    elif row["Meta"] == 0:
+    if row["Meta"] == 0:
         return "0%"
     else:
         valor = round((row["Ejecutado"] / row["Meta"]) * 100, 1)
         return f"{valor}%"
+
 
 df_filtrado["% Cumplimiento"] = df_filtrado.apply(calcular_cumplimiento, axis=1)
 
