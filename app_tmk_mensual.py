@@ -120,45 +120,23 @@ st.title(f"📊 Presupuesto TMK - {mes} {año}")
 # CÁLCULO CUMPLIMIENTO
 # -------------------------
 def calcular_cumplimiento(row):
-    if row["Meta"] == 0:
+    if row["Concepto"] in ["Pyme Móvil - salarial", "CLOUND - salarial"]:
+        return "0%"
+    elif row["Meta"] == 0:
         return "0%"
     else:
         valor = round((row["Ejecutado"] / row["Meta"]) * 100, 1)
         return f"{valor}%"
 
-
 df_filtrado["% Cumplimiento"] = df_filtrado.apply(calcular_cumplimiento, axis=1)
 
 opciones_pago = ["100%", "90%", "0%"]
-
-# -------------------------
-# FUNCION SEMÁFORO
-# -------------------------
-def color_cumplimiento(val):
-
-    try:
-        # Quitar %
-        val = str(val).replace("%", "")
-        val = float(val)
-
-        if val >= 100:
-            color = '#58d68d'   # Verde
-        elif val >= 80:
-            color = '#f4d03f'   # Amarillo
-        else:
-            color = '#ec7063'   # Rojo
-
-        return f'background-color: {color}; color: black'
-
-    except:
-        return ''
 
 
 # -------------------------
 # TABLA PRINCIPAL
 # -------------------------
 if st.session_state.rol == "director":
-
     st.success("Modo Director: puedes editar pagos")
 
     df_editado = st.data_editor(
@@ -173,25 +151,6 @@ if st.session_state.rol == "director":
         num_rows="fixed"
     )
 
-    # =========================
-    # TABLA VISUAL CON SEMÁFORO
-    # =========================
-    st.markdown("### 📊 Vista cumplimiento")
-
-    st.dataframe(
-        df_editado.style
-        .format({
-            "Meta": "{:,.0f}",
-            "Ejecutado": "{:,.1f}",
-            "% Cumplimiento": "{:.1f}%"
-        })
-        .map(
-            color_cumplimiento,
-            subset=["% Cumplimiento"]
-        ),
-        use_container_width=True
-    )
-
     if st.button("💾 Guardar cambios"):
 
         archivo_base = "presupuesto_TMK.xlsx"
@@ -200,7 +159,6 @@ if st.session_state.rol == "director":
         df_base = pd.read_excel(archivo_base, sheet_name="Datos")
 
         for index, row in df_editado.iterrows():
-
             condicion = (
                 (df_base["Año"] == row["Año"]) &
                 (df_base["Mes"] == row["Mes"]) &
@@ -208,31 +166,17 @@ if st.session_state.rol == "director":
                 (df_base["Concepto"] == row["Concepto"])
             )
 
-            df_base.loc[
-                condicion,
-                "Pago cumplimiento"
-            ] = row["Pago cumplimiento"]
+            df_base.loc[condicion, "Pago cumplimiento"] = row["Pago cumplimiento"]
 
-        df_base.to_excel(
-            archivo_base,
-            sheet_name="Datos",
-            index=False
-
-        )
+        df_base.to_excel(archivo_base, sheet_name="Datos", index=False)
 
         df_hist = df_editado.copy()
         df_hist["Usuario cambio"] = st.session_state.usuario
         df_hist["Fecha cambio"] = datetime.now()
 
         if os.path.exists(archivo_hist):
-
             hist = pd.read_excel(archivo_hist)
-
-            hist = pd.concat(
-                [hist, df_hist],
-                ignore_index=True
-            )
-
+            hist = pd.concat([hist, df_hist], ignore_index=True)
         else:
             hist = df_hist
 
@@ -241,25 +185,10 @@ if st.session_state.rol == "director":
         st.success("Cambios guardados y actualizados correctamente")
 
 else:
-
     # Usuario administrativo: solo visualiza
     df_editado = df_filtrado.copy()
-
     st.info("Modo administrativo: solo visualización")
-
-    st.dataframe(
-        df_editado.style
-        .format({
-            "Meta": "{:,.0f}",
-            "Ejecutado": "{:,.1f}",
-        })
-        .map(
-            color_cumplimiento,
-            subset=["% Cumplimiento"]
-        ),
-        use_container_width=True
-    )
-
+    st.dataframe(df_editado, use_container_width=True)
 # -------------------------
 # DESCARGAR HISTÓRICO
 # -------------------------
@@ -338,10 +267,12 @@ with col1:
 with col2:
     grafico_con_tendencia(ref, "Referidos por asesora")
 
+
+
 # -------------------------
 # GRÁFICO CORPORATIVO POR PRODUCTO
 # -------------------------
-st.markdown("## 🏢 Comportamiento corporativo Deisy Gil por producto")
+st.markdown("## 🏢 Comportamiento corporativo por producto")
 
 lider = df_editado[df_editado["Rol"] == "Líder"]
 
